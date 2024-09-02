@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF Recommendations</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-6 text-center">GIF Recommendations</h1>
+        <form id="searchForm" class="mb-6">
+            <input type="text" id="query" class="border border-gray-300 rounded-lg p-2 w-full mb-4" placeholder="Introduce una consulta" required>
+            <button type="submit" class="bg-blue-500 text-white rounded-lg py-2 px-4 w-full">Buscar</button>
+        </form>
+        <div id="results" class="space-y-6"></div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const query = document.getElementById('query').value;
+            const resultsDiv = document.getElementById('results');
+            
+            resultsDiv.innerHTML = '<p class="text-gray-500 text-center">Cargando...</p>';
+
+            try {
+                const response = await fetch('/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                resultsDiv.innerHTML = '';
+
+                data.forEach(([url, description, score]) => {
+                    const resultItem = document.createElement('div');
+                    resultItem.classList.add('bg-gray-100', 'p-4', 'rounded-lg', 'shadow-md');
+                    resultItem.innerHTML = `
+                        <img src="${url}" alt="${description}" class="w-full h-auto rounded-md mb-4">
+                        <p class="text-gray-700 font-medium">${description} (Score: ${score.toFixed(2)})</p>
+                    `;
+                    resultsDiv.appendChild(resultItem);
+                });
+            } catch (error) {
+                resultsDiv.innerHTML = '<p class="text-red-500 text-center">Error fetching data.</p>';
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
