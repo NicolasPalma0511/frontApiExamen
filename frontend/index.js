@@ -7,6 +7,11 @@ const port = 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Health Check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 // Ruta para servir el archivo HTML
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
